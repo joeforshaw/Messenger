@@ -101,14 +101,14 @@ namespace JoeForshaw.Messenger
             InnerUnsubscribe (subscriber, message, null);
         }
 
+        public static void ClearAllSubscribers ()
+        {
+            Callbacks.Clear ();
+        }
+
         static string GetIDableSignature (IDable idable)
         {
             return $"{idable.GetType ().FullName}.{idable.ID}";
-        }
-
-        internal static void ClearSubscribers ()
-        {
-            Callbacks.Clear ();
         }
 
         static void InnerSend (string message, Type argType, object args)

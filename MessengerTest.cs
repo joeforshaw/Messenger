@@ -1,7 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace JoeForshaw.Messenger
+namespace JoeForshaw.Messenger.Tests
 {
     [TestFixture]
     public class MessengerTest
@@ -9,7 +8,7 @@ namespace JoeForshaw.Messenger
         [TearDown]
         public void TearDown ()
         {
-            Messenger.ClearSubscribers ();
+            Messenger.ClearAllSubscribers ();
         }
         
         [Test]
@@ -46,7 +45,7 @@ namespace JoeForshaw.Messenger
         public void TestSubscribeWithIDWithoutArg ()
         {
             var subscriber = new MockSubscriberWithID ();
-            var otherSubscriber = new MockSubscriber ();
+            var otherSubscriber = new MockSubscriberWithID ();
             Messenger.Subscribe (subscriber, subscriber.HandleMessage);
             var countBefore = subscriber.MessagesReceived;
             
@@ -61,7 +60,7 @@ namespace JoeForshaw.Messenger
         public void TestSubscribeWithIDWithArg ()
         {
             var subscriber = new MockSubscriberWithID ();
-            var otherSubscriber = new MockSubscriber ();
+            var otherSubscriber = new MockSubscriberWithID ();
             Messenger.Subscribe<MockArgs> (subscriber, subscriber.HandleMessage);
             var countBefore = subscriber.MessagesReceived;
             

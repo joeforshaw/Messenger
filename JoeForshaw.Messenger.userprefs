@@ -1,9 +1,18 @@
-﻿<Properties>
+﻿<Properties StartupConfiguration="{F8A1E855-B053-4EA2-B2F5-0FDD13D0C88E}|Unit Tests">
+  <MonoDevelop.Ide.ItemProperties.JoeForshaw.Messenger PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="MessengerTest.cs">
     <Files>
-      <File FileName="Messenger.cs" Line="6" Column="31" />
-      <File FileName="MessengerTest.cs" Line="4" Column="31" />
+      <File FileName="README.md" Line="4" Column="9" />
+      <File FileName="MessengerTest.cs" Line="18" Column="48" />
+      <File FileName="Messenger.cs" Line="110" Column="10" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.UnitTesting.TestPad">
+        <State name="__root__">
+          <Node name="JoeForshaw.Messenger" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
