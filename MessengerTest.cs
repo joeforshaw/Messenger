@@ -148,7 +148,7 @@ namespace JoeForshaw.Messenger.Tests
     {
         public static readonly string Signature = "signature.mock";
     
-        public int MessagesReceived { get; set; }
+        public int MessagesReceived { get; private set; }
         
         public void HandleMessage ()
         {
@@ -161,7 +161,7 @@ namespace JoeForshaw.Messenger.Tests
         }
     }
 
-    class MockSubscriberWithID : MockSubscriber, IDable
+    class MockSubscriberWithID : MockSubscriber, IHasID
     {
         public int ID { get; set; }
     }

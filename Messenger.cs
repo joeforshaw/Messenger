@@ -19,39 +19,39 @@ namespace JoeForshaw.Messenger
             InnerSend (message, null, null);
         }
         
-        public static void Send<TArgs> (IDable idable, TArgs args)
+        public static void Send<TArgs> (IHasID subscriber, TArgs args)
         {            
-            InnerSend (GetIDableSignature (idable), typeof (TArgs), args);
+            InnerSend (GetSignatureFor (subscriber), typeof (TArgs), args);
         }
         
-        public static void Send (IDable idable)
+        public static void Send (IHasID subscriber)
         {            
-            InnerSend (GetIDableSignature (idable), null, null);
+            InnerSend (GetSignatureFor (subscriber), null, null);
         }
         
-        public static void Subscribe<TArgs> (IDable idable, Action<TArgs> callback)
+        public static void Subscribe<TArgs> (IHasID subscriber, Action<TArgs> callback)
         {
-            InnerSubscribe (idable, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
+            InnerSubscribe (subscriber, GetSignatureFor (subscriber), typeof (TArgs), args => callback ((TArgs) args));
         }
         
-        public static void Subscribe (IDable idable, Action callback)
+        public static void Subscribe (IHasID subscriber, Action callback)
         {
-            InnerSubscribe (idable, GetIDableSignature (idable), null, args => callback ());
+            InnerSubscribe (subscriber, GetSignatureFor (subscriber), null, args => callback ());
         }
         
-        public static void Subscribe<TArgs> (IEnumerable<IDable> idables, Action<TArgs> callback)
+        public static void Subscribe<TArgs> (IEnumerable<IHasID> subscribers, Action<TArgs> callback)
         {
-            foreach (var idable in idables)
+            foreach (var subscriber in subscribers)
             {
-                InnerSubscribe (idable, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
+                InnerSubscribe (subscriber, GetSignatureFor (subscriber), typeof (TArgs), args => callback ((TArgs) args));
             }
         }
         
-        public static void Subscribe (IEnumerable<IDable> idables, Action callback)
+        public static void Subscribe (IEnumerable<IHasID> subscribers, Action callback)
         {
-            foreach (var idable in idables)
+            foreach (var subscriber in subscribers)
             {
-                InnerSubscribe (idable, GetIDableSignature (idable), null, args => callback ());
+                InnerSubscribe (subscriber, GetSignatureFor (subscriber), null, args => callback ());
             }
         }
 
@@ -65,40 +65,40 @@ namespace JoeForshaw.Messenger
             InnerSubscribe (subscriber, message, null, (args) => callback ());
         }
         
-        public static void Unsubscribe<TArgs> (IDable idable)
+        public static void Unsubscribe<TArgs> (IHasID unsubscriber)
         {
-            InnerUnsubscribe (idable, GetIDableSignature (idable), typeof (TArgs));
+            InnerUnsubscribe (unsubscriber, GetSignatureFor (unsubscriber), typeof (TArgs));
         }
 
-        public static void Unsubscribe (IDable idable)
+        public static void Unsubscribe (IHasID unsubscriber)
         {
-            InnerUnsubscribe (idable, GetIDableSignature (idable), null);
+            InnerUnsubscribe (unsubscriber, GetSignatureFor (unsubscriber), null);
         }
         
-        public static void Unsubscribe<TArgs> (IEnumerable<IDable> idables)
+        public static void Unsubscribe<TArgs> (IEnumerable<IHasID> unsubscribers)
         {
-            foreach (var idable in idables)
+            foreach (var unsubscriber in unsubscribers)
             {
-                InnerUnsubscribe (idable, GetIDableSignature (idable), typeof (TArgs));
+                InnerUnsubscribe (unsubscriber, GetSignatureFor (unsubscriber), typeof (TArgs));
             }
         }
         
-        public static void Unsubscribe (IEnumerable<IDable> idables)
+        public static void Unsubscribe (IEnumerable<IHasID> unsubscribers)
         {
-            foreach (var idable in idables)
+            foreach (var unsubscriber in unsubscribers)
             {
-                InnerUnsubscribe (idable, GetIDableSignature (idable), null);
+                InnerUnsubscribe (unsubscriber, GetSignatureFor (unsubscriber), null);
             }
         }
 
-        public static void Unsubscribe<TArgs> (object subscriber, string message)
+        public static void Unsubscribe<TArgs> (object unsubscriber, string message)
         {
-            InnerUnsubscribe (subscriber, message, typeof (TArgs));
+            InnerUnsubscribe (unsubscriber, message, typeof (TArgs));
         }
 
-        public static void Unsubscribe (object subscriber, string message)
+        public static void Unsubscribe (object unsubscriber, string message)
         {
-            InnerUnsubscribe (subscriber, message, null);
+            InnerUnsubscribe (unsubscriber, message, null);
         }
 
         public static void ClearAllSubscribers ()
@@ -106,9 +106,9 @@ namespace JoeForshaw.Messenger
             Callbacks.Clear ();
         }
 
-        static string GetIDableSignature (IDable idable)
+        static string GetSignatureFor (IHasID objectWithID)
         {
-            return $"{idable.GetType ().FullName}.{idable.ID}";
+            return $"{objectWithID.GetType ().FullName}.{objectWithID.ID}";
         }
 
         static void InnerSend (string message, Type argType, object args)
@@ -135,10 +135,8 @@ namespace JoeForshaw.Messenger
         static void InnerSubscribe (object subscriber, string message, Type argType, Action<object> callback)
         {
             if (subscriber == null) { throw new ArgumentNullException (nameof (subscriber)); }
-            
-            if (message == null) { throw new ArgumentNullException (nameof (message)); }
-        
-            if (callback == null) { throw new ArgumentNullException (nameof (callback)); }
+            if (message    == null) { throw new ArgumentNullException (nameof (message)); }
+            if (callback   == null) { throw new ArgumentNullException (nameof (callback)); }
             
             var key = new MessageSignature (message, argType);
             
@@ -157,15 +155,12 @@ namespace JoeForshaw.Messenger
         static void InnerUnsubscribe (object subscriber, string message, Type argType)
         {
             if (subscriber == null) { throw new ArgumentNullException (nameof (subscriber)); }
-            
-            if (message == null) { throw new ArgumentNullException (nameof (message)); }
+            if (message    == null) { throw new ArgumentNullException (nameof (message)); }
 
             var key = new MessageSignature (message, argType);
             
             if (!Callbacks.ContainsKey (key)) { return; }
-            
-            Callbacks [key].RemoveAll (tuple => !tuple.Item1.IsAlive || tuple.Item1.Target == subscriber);
-            
+                        
             if (Callbacks [key].Any ())
             {
                 var deleted = new List<MessageSubscription> ();
@@ -174,7 +169,7 @@ namespace JoeForshaw.Messenger
         }
     }
     
-    public interface IDable
+    public interface IHasID
     {
         int ID { get; set; }
     }
