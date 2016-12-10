@@ -1,4 +1,4 @@
-﻿<Properties StartupConfiguration="{F8A1E855-B053-4EA2-B2F5-0FDD13D0C88E}|Unit Tests">
+﻿<Properties StartupConfiguration="{8812F8AB-9C39-453A-90BA-A5B3B672B9DA}|Unit Tests">
   <MonoDevelop.Ide.ItemProperties.JoeForshaw.Messenger PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="MessengerTest.cs">
     <Files>
@@ -6,17 +6,11 @@
       <File FileName="MessengerTest.cs" Line="18" Column="48" />
       <File FileName="Messenger.cs" Line="110" Column="10" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.UnitTesting.TestPad">
-        <State name="__root__">
-          <Node name="JoeForshaw.Messenger" expanded="True" selected="True" />
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.JoeForshaw.Messenger.Tests PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>
