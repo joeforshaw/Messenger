@@ -2,6 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo ("JoeForshaw.Messenger.Tests")]
 
 namespace JoeForshaw.Messenger
 {
@@ -9,41 +12,23 @@ namespace JoeForshaw.Messenger
     {
         static readonly MessageDispatcher Callbacks = new MessageDispatcher ();
 
-        public static void Send<T> (string message, T args)
-        {            
-            InnerSend (message, typeof (T), args);
-        }
-
-        public static void Send (string message)
-        {            
-            InnerSend (message, null, null);
-        }
-        
-        public static void Send<T> (IHasID sender, T args)
-        {            
-            InnerSend (GetSignatureFor (sender), typeof (T), args);
-        }
-        
-        public static void Send (IHasID sender)
-        {            
-            InnerSend (GetSignatureFor (sender), null, null);
-        }
+        // Subscribe
         
         public static void Subscribe<T> (object subscriber, IHasID sender, Action<T> callback)
         {
-            InnerSubscribe (subscriber, GetSignatureFor (sender), typeof (T), args => callback ((T) args));
+            PerformSubscribe (subscriber, GetSignatureFor (sender), typeof (T), args => callback ((T) args));
         }
         
         public static void Subscribe (object subscriber, IHasID sender, Action callback)
         {
-            InnerSubscribe (subscriber, GetSignatureFor (sender), null, args => callback ());
+            PerformSubscribe (subscriber, GetSignatureFor (sender), null, args => callback ());
         }
         
         public static void Subscribe<T> (object subscriber, IEnumerable<IHasID> senders, Action<T> callback)
         {
             foreach (var sender in senders)
             {
-                InnerSubscribe (subscriber, GetSignatureFor (sender), typeof (T), args => callback ((T) args));
+                PerformSubscribe (subscriber, GetSignatureFor (sender), typeof (T), args => callback ((T) args));
             }
         }
         
@@ -51,63 +36,99 @@ namespace JoeForshaw.Messenger
         {
             foreach (var sender in senders)
             {
-                InnerSubscribe (subscriber, GetSignatureFor (sender), null, args => callback ());
+                PerformSubscribe (subscriber, GetSignatureFor (sender), null, args => callback ());
             }
         }
 
-        public static void Subscribe<T> (object subscriber, string message, Action<T> callback)
+        public static void Subscribe<T> (object subscriber, string identifier, Action<T> callback)
         {
-            InnerSubscribe (subscriber, message, typeof (T), (args) => callback ((T) args));
+            PerformSubscribe (subscriber, identifier, typeof (T), (args) => callback ((T) args));
         }
 
-        public static void Subscribe (object subscriber, string message, Action callback)
+        public static void Subscribe (object subscriber, string identifier, Action callback)
         {
-            InnerSubscribe (subscriber, message, null, (args) => callback ());
+            PerformSubscribe (subscriber, identifier, null, (args) => callback ());
+        }
+        
+        // Send
+
+        public static void Send<T> (string identifier, T args)
+        {            
+            PerformSend (identifier, typeof (T), args);
+        }
+
+        public static void Send (string identifier)
+        {            
+            PerformSend (identifier, null, null);
+        }
+        
+        public static void Send<T> (IHasID sender, T args)
+        {            
+            PerformSend (GetSignatureFor (sender), typeof (T), args);
+        }
+        
+        public static void Send (IHasID sender)
+        {            
+            PerformSend (GetSignatureFor (sender), null, null);
+        }
+        
+        // Unsubscribe
+        
+        public static void Unsubscribe<T> (object unsubscriber, string identifier)
+        {
+            PerformUnsubscribe (unsubscriber, identifier, typeof (T));
+        }
+
+        public static void Unsubscribe (object unsubscriber, string identifier)
+        {
+            PerformUnsubscribe (unsubscriber, identifier, null);
+        }
+                
+        public static void Unsubscribe<T> (object unsubscriber, IHasID sender)
+        {
+            PerformUnsubscribe (unsubscriber, GetSignatureFor (sender), typeof (T));
         }
         
         public static void Unsubscribe (object unsubscriber, IHasID sender)
         {
-            InnerUnsubscribe (unsubscriber, GetSignatureFor (sender), null);
-        }
-        
-        public static void Unsubscribe<T> (object unsubscriber, IHasID sender)
-        {
-            InnerUnsubscribe (unsubscriber, GetSignatureFor (sender), typeof (T));
+            PerformUnsubscribe (unsubscriber, GetSignatureFor (sender), null);
         }
         
         public static void Unsubscribe<T> (object unsubscriber, IEnumerable<IHasID> senders)
         {
             foreach (var sender in senders)
             {
-                InnerUnsubscribe (unsubscriber, GetSignatureFor (sender), typeof (T));
+                PerformUnsubscribe (unsubscriber, GetSignatureFor (sender), typeof (T));
+            }
+        }
+        
+        public static void Unsubscribe (object unsubscriber, IEnumerable<IHasID> senders)
+        {
+            foreach (var sender in senders)
+            {
+                PerformUnsubscribe (unsubscriber, GetSignatureFor (sender), null);
             }
         }
 
-        public static void Unsubscribe<T> (object unsubscriber, string message)
-        {
-            InnerUnsubscribe (unsubscriber, message, typeof (T));
-        }
+        // Internal methods
 
-        public static void Unsubscribe (object unsubscriber, string message)
-        {
-            InnerUnsubscribe (unsubscriber, message, null);
-        }
-
-        public static void ClearAllSubscribers ()
+        internal static void ClearAllSubscribers ()
         {
             Callbacks.Clear ();
         }
+        
+        // Private methods
 
         static string GetSignatureFor (IHasID sender)
         {
             return $"{sender.GetType ().FullName}.{sender.ID}";
         }
 
-        static void InnerSend (string message, Type argType, object args)
+        static void PerformSend (string identifier, Type argType, object args)
         {
-            if (message == null) { throw new ArgumentNullException (nameof (message)); }
+            if (identifier == null) { throw new ArgumentNullException (nameof (identifier)); }
             
-            var key = new MessageSignature (message, argType);
+            var key = new MessageSignature (identifier, argType);
             
             if (!Callbacks.ContainsKey (key)) { return; }
             
@@ -124,13 +145,13 @@ namespace JoeForshaw.Messenger
             }
         }
         
-        static void InnerSubscribe (object subscriber, string message, Type argType, Action<object> callback)
+        static void PerformSubscribe (object subscriber, string identifier, Type argType, Action<object> callback)
         {
             if (subscriber == null) { throw new ArgumentNullException (nameof (subscriber)); }
-            if (message    == null) { throw new ArgumentNullException (nameof (message)); }
+            if (identifier == null) { throw new ArgumentNullException (nameof (identifier)); }
             if (callback   == null) { throw new ArgumentNullException (nameof (callback)); }
             
-            var key = new MessageSignature (message, argType);
+            var key = new MessageSignature (identifier, argType);
             
             var value = new MessageSubscription (subscriber, callback);
             
@@ -144,12 +165,12 @@ namespace JoeForshaw.Messenger
             }
         }
         
-        static void InnerUnsubscribe (object subscriber, string message, Type argType)
+        static void PerformUnsubscribe (object subscriber, string identifier, Type argType)
         {
             if (subscriber == null) { throw new ArgumentNullException (nameof (subscriber)); }
-            if (message    == null) { throw new ArgumentNullException (nameof (message)); }
+            if (identifier == null) { throw new ArgumentNullException (nameof (identifier)); }
 
-            var key = new MessageSignature (message, argType);
+            var key = new MessageSignature (identifier, argType);
             
             if (!Callbacks.ContainsKey (key)) { return; }
                         
