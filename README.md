@@ -71,21 +71,21 @@ This can useful when passing around objects that need to kept in sync, such as m
 using System;
 using JoeForshaw.Messenger;
 
-class ModelSyncSample
+class UserSyncSample
 {
     public static void Main (string [] args)
     {
-        var model = new Model (1, "Foo");
-        var copy  = new Model (1, "Foo");
+        var user  = new User (1, "Foo");
+        var copy  = new User (1, "Foo");
         
-        model.Name = "Bar";
+        user.Name = "Bar";
         
-        Console.WriteLine (model.Name); // "Bar"
-        Console.WriteLine (copy.Name);  // "Bar"
+        Console.WriteLine (user.Name); // "Bar"
+        Console.WriteLine (copy.Name); // "Bar"
     }
 }
 
-class Model : IHasID
+class User : IHasID
 {
     public int ID { get; set; }
 
@@ -101,27 +101,27 @@ class Model : IHasID
         }
     }
 
-    public Model (int id, string name)
+    public User (int id, string name)
     {
         ID = id;
         Name = name;
-        Messenger.Subscribe<ModelUpdatedArgs> (this, this, HandleUpdateMessage);
+        Messenger.Subscribe<UserUpdatedArgs> (this, this, HandleUpdateMessage);
     }
     
     public void SendUpdateMessage ()
     {
-        Messenger.Send (this, new ModelUpdatedArgs { UpdatedModel = this });
+        Messenger.Send (this, new UserUpdatedArgs { UpdatedUser = this });
     }
     
-    public void HandleUpdateMessage (ModelUpdatedArgs args)
+    public void HandleUpdateMessage (UserUpdatedArgs args)
     {
-        _name = args.UpdatedModel.Name;
+        _name = args.UpdatedUser.Name;
     }
 }
 
-class ModelUpdatedArgs
+class UserUpdatedArgs
 {
-    public Model UpdatedModel { get; set; }
+    public User UpdatedUser { get; set; }
 }
 ```
 
