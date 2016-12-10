@@ -4,6 +4,21 @@ An easy C# publish-subscribe library.
 ## Usage
 `Messenger` allows objects to subscribe to different message signatures and also send messages to subscribers with matching signatures.
 
+Subscribing:
+```
+Messenger.Subscribe (this, "foo.bar", () => Console.WriteLine ("Foo Bar"));
+```
+
+Sending messages:
+```
+Messenger.Send ("foo.bar");
+```
+
+Unsubscribing:
+```
+Messenger.Unsubscribe (this, "foo.bar");
+```
+
 ### Signatures
 Message signatures are composed of a string identifer and an argument type. For an object to receive messages of a specific type, both the string identifier and argument type must match.
 ```
