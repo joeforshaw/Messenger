@@ -12,7 +12,7 @@ Messenger.Subscribe<ArgumentType> (this, "string identifier", args => Console.Wr
 
 It's possible to subscribe to a signature without an argument type if arguments aren't required:
 ```
-Messenger.Subscribe<ArgumentType> (this, "string identifier", (ArgumentType args) => Console.WriteLine ("Message received"));
+Messenger.Subscribe (this, "string identifier", () => Console.WriteLine ("Message received"));
 ```
 
 But it's important to note messages with the same string indentifier but different argument type (including no type arguments) are different signatures, so won't be received by the same subscribers.
