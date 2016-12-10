@@ -2,33 +2,110 @@
 An easy C# publish-subscribe library.
 
 ## Usage
-`Messenger.cs` allows objects to subscribe to different message signatures and also send messages to subscribers with matching signatures.
+`Messenger` allows objects to subscribe to different message signatures and also send messages to subscribers with matching signatures.
 
 ### Signatures
-Message signatures are composed of a string identifer and the message argument type. For an object to receive messages of a specific type, both the string identifier and argument type must be exactly the same.
+Message signatures are composed of a string identifer and an argument type. For an object to receive messages of a specific type, both the string identifier and argument type must match.
 ```
-// TODO
+Messenger.Subscribe<ArgumentType> (this, "string identifier", args => Console.WriteLine ("Message received"));
 ```
 
 It's possible to subscribe to a signature without an argument type if arguments aren't required:
 ```
-Messenger.Subscribe (this, "joeforshaw.example", () => Console.WriteLine ("Received a 'joeforshaw.example' message"))
+Messenger.Subscribe<ArgumentType> (this, "string identifier", (ArgumentType args) => Console.WriteLine ("Message received"));
 ```
+
+But it's important to note messages with the same string indentifier but different argument type (including no type arguments) are different signatures, so won't be received by the same subscribers.
 
 ### IHasID Interface
-Objects which implement the `IHasID.cs` interface must contain an `ID` int property.
+Instead of subscribing to messages using string signatures, you can pass in an object which implements the `IHasID` interface. Under the hood, a signature will be generated from the type of the object and it's ID (a required `int` property of the `IHasID` interface).
 
-The below code will subscribe to message
+This can useful when passing around objects that need to kept in sync, such as models
 ```
+sing System;
+using JoeForshaw.Messenger;
+
+class ModelSyncSample
+{
+    public static void Main (string [] args)
+    {
+        var model = new Model (1, "Foo");
+        var copy  = new Model (1, "Foo");
+        
+        model.Name = "Bar";
+        
+        Console.WriteLine (model.Name); // "Bar"
+        Console.WriteLine (copy.Name);  // "Bar"
+    }
+}
+
 class Model : IHasID
 {
-  public int ID { get; set; }
-}
-...
-var foo = new Model { ID = 1 }
-var bar = new Model { ID = 2 }
+    public int ID { get; set; }
 
+    string _name;
+    public string Name
+    {
+        get { return _name; }
+        set
+        {
+            _name = value;
+            
+            SendUpdateMessage ();
+        }
+    }
+
+    public Model (int id, string name)
+    {
+        ID = id;
+        Name = name;
+        Messenger.Subscribe<ModelUpdatedArgs> (this, this, HandleUpdateMessage);
+    }
+    
+    public void SendUpdateMessage ()
+    {
+        Messenger.Send (this, new ModelUpdatedArgs { UpdatedModel = this });
+    }
+    
+    public void HandleUpdateMessage (ModelUpdatedArgs args)
+    {
+        _name = args.UpdatedModel.Name;
+    }
+}
+
+class ModelUpdatedArgs
+{
+    public Model UpdatedModel { get; set; }
+}
 ```
 
-### Roadmap
+## Example
+Here's an example of an object subscribing to "foo.bar" messages:
+```
+using System;
+using JoeForshaw.Messenger;
+
+class SubscribeSample
+{
+    public static void Main (string [] args)
+    {
+        var subscriber = new Subscriber ();
+
+        Messenger.Subscribe (subscriber, "foo.bar", subscriber.HandleFooBar);
+        
+        Messenger.Send ("foo.bar"); // Prints "Foo Bar"
+    }
+}
+
+class Subscriber
+{
+    public void HandleFooBar ()
+    {
+        Console.WriteLine ("Foo Bar");
+    }
+}
+```
+
+## Roadmap
 * Asynchronous message sends
+* Subscribe return values
