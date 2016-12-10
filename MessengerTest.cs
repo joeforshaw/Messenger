@@ -44,31 +44,29 @@ namespace JoeForshaw.Messenger.Tests
         [Test]
         public void TestSubscribeWithIDWithoutArg ()
         {
-            var subscriber = new MockSubscriberWithID ();
-            var otherSubscriber = new MockSubscriberWithID ();
-            Messenger.Subscribe (subscriber, subscriber.HandleMessage);
+            var subscriber = new MockSubscriber ();
+            var sender     = new MockSubscriberWithID ();
+            Messenger.Subscribe (subscriber, sender, subscriber.HandleMessage);
             var countBefore = subscriber.MessagesReceived;
             
-            Messenger.Send (subscriber);
+            Messenger.Send (sender);
             
             Assert.AreEqual (0, countBefore);
             Assert.AreEqual (1, subscriber.MessagesReceived);
-            Assert.AreEqual (0, otherSubscriber.MessagesReceived);
         }
         
         [Test]
         public void TestSubscribeWithIDWithArg ()
         {
-            var subscriber = new MockSubscriberWithID ();
-            var otherSubscriber = new MockSubscriberWithID ();
-            Messenger.Subscribe<MockArgs> (subscriber, subscriber.HandleMessage);
+            var subscriber = new MockSubscriber ();
+            var sender     = new MockSubscriberWithID ();
+            Messenger.Subscribe<MockArgs> (subscriber, sender, subscriber.HandleMessage);
             var countBefore = subscriber.MessagesReceived;
             
-            Messenger.Send (subscriber, new MockArgs ());
+            Messenger.Send (sender, new MockArgs ());
             
             Assert.AreEqual (0, countBefore);
             Assert.AreEqual (1, subscriber.MessagesReceived);
-            Assert.AreEqual (0, otherSubscriber.MessagesReceived);
         }
         
         [Test]
@@ -110,15 +108,16 @@ namespace JoeForshaw.Messenger.Tests
         [Test]
         public void TestUnsubscribeWithIDWithoutArg ()
         {
-            var subscriber = new MockSubscriberWithID ();
-            Messenger.Subscribe (subscriber, subscriber.HandleMessage);
+            var subscriber = new MockSubscriber ();
+            var sender     = new MockSubscriberWithID ();
+            Messenger.Subscribe (subscriber, sender, subscriber.HandleMessage);
             var countAfterSubscribe = subscriber.MessagesReceived;
             
-            Messenger.Send (subscriber);
+            Messenger.Send (sender);
             var countAfterSend = subscriber.MessagesReceived;
             
-            Messenger.Unsubscribe (subscriber);
-            Messenger.Send (subscriber);
+            Messenger.Unsubscribe (subscriber, sender);
+            Messenger.Send (sender);
             
             Assert.AreEqual (0, countAfterSubscribe);
             Assert.AreEqual (1, countAfterSend);
@@ -128,15 +127,16 @@ namespace JoeForshaw.Messenger.Tests
         [Test]
         public void TestUnsubscribeWithIDWithArg ()
         {
-            var subscriber = new MockSubscriberWithID ();
-            Messenger.Subscribe<MockArgs> (subscriber, subscriber.HandleMessage);
+            var subscriber = new MockSubscriber ();
+            var sender     = new MockSubscriberWithID ();
+            Messenger.Subscribe<MockArgs> (subscriber, sender, subscriber.HandleMessage);
             var countAfterSubscribe = subscriber.MessagesReceived;
             
-            Messenger.Send (subscriber, new MockArgs ());
+            Messenger.Send (sender, new MockArgs ());
             var countAfterSend = subscriber.MessagesReceived;
             
-            Messenger.Unsubscribe<MockArgs> (subscriber);
-            Messenger.Send (subscriber, new MockArgs ());
+            Messenger.Unsubscribe<MockArgs> (subscriber, sender);
+            Messenger.Send (sender, new MockArgs ());
             
             Assert.AreEqual (0, countAfterSubscribe);
             Assert.AreEqual (1, countAfterSend);

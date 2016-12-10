@@ -29,29 +29,29 @@ namespace JoeForshaw.Messenger
             InnerSend (GetIDableSignature (idable), null, null);
         }
         
-        public static void Subscribe<TArgs> (IDable idable, Action<TArgs> callback)
+        public static void Subscribe<TArgs> (object subscriber, IDable idable, Action<TArgs> callback)
         {
-            InnerSubscribe (idable, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
+            InnerSubscribe (subscriber, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
         }
         
-        public static void Subscribe (IDable idable, Action callback)
+        public static void Subscribe (object subscriber, IDable idable, Action callback)
         {
-            InnerSubscribe (idable, GetIDableSignature (idable), null, args => callback ());
+            InnerSubscribe (subscriber, GetIDableSignature (idable), null, args => callback ());
         }
         
-        public static void Subscribe<TArgs> (IEnumerable<IDable> idables, Action<TArgs> callback)
+        public static void Subscribe<TArgs> (object subscriber, IEnumerable<IDable> idables, Action<TArgs> callback)
         {
             foreach (var idable in idables)
             {
-                InnerSubscribe (idable, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
+                InnerSubscribe (subscriber, GetIDableSignature (idable), typeof (TArgs), args => callback ((TArgs) args));
             }
         }
         
-        public static void Subscribe (IEnumerable<IDable> idables, Action callback)
+        public static void Subscribe (object subscriber, IEnumerable<IDable> idables, Action callback)
         {
             foreach (var idable in idables)
             {
-                InnerSubscribe (idable, GetIDableSignature (idable), null, args => callback ());
+                InnerSubscribe (subscriber, GetIDableSignature (idable), null, args => callback ());
             }
         }
 
@@ -65,40 +65,40 @@ namespace JoeForshaw.Messenger
             InnerSubscribe (subscriber, message, null, (args) => callback ());
         }
         
-        public static void Unsubscribe<TArgs> (IDable idable)
+        public static void Unsubscribe<TArgs> (object unsubscriber, IDable idable)
         {
-            InnerUnsubscribe (idable, GetIDableSignature (idable), typeof (TArgs));
+            InnerUnsubscribe (unsubscriber, GetIDableSignature (idable), typeof (TArgs));
         }
 
-        public static void Unsubscribe (IDable idable)
+        public static void Unsubscribe (object unsubscriber, IDable idable)
         {
-            InnerUnsubscribe (idable, GetIDableSignature (idable), null);
+            InnerUnsubscribe (unsubscriber, GetIDableSignature (idable), null);
         }
         
-        public static void Unsubscribe<TArgs> (IEnumerable<IDable> idables)
+        public static void Unsubscribe<TArgs> (object unsubscriber, IEnumerable<IDable> idables)
         {
             foreach (var idable in idables)
             {
-                InnerUnsubscribe (idable, GetIDableSignature (idable), typeof (TArgs));
+                InnerUnsubscribe (unsubscriber, GetIDableSignature (idable), typeof (TArgs));
             }
         }
         
-        public static void Unsubscribe (IEnumerable<IDable> idables)
+        public static void Unsubscribe (object unsubscriber, IEnumerable<IDable> idables)
         {
             foreach (var idable in idables)
             {
-                InnerUnsubscribe (idable, GetIDableSignature (idable), null);
+                InnerUnsubscribe (unsubscriber, GetIDableSignature (idable), null);
             }
         }
 
-        public static void Unsubscribe<TArgs> (object subscriber, string message)
+        public static void Unsubscribe<TArgs> (object unsubscriber, string message)
         {
-            InnerUnsubscribe (subscriber, message, typeof (TArgs));
+            InnerUnsubscribe (unsubscriber, message, typeof (TArgs));
         }
 
-        public static void Unsubscribe (object subscriber, string message)
+        public static void Unsubscribe (object unsubscriber, string message)
         {
-            InnerUnsubscribe (subscriber, message, null);
+            InnerUnsubscribe (unsubscriber, message, null);
         }
 
         public static void ClearAllSubscribers ()
