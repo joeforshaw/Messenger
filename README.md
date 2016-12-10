@@ -20,9 +20,9 @@ But it's important to note messages with the same string indentifier but differe
 ### IHasID Interface
 Instead of subscribing to messages using string signatures, you can pass in an object which implements the `IHasID` interface. Under the hood, a signature will be generated from the type of the object and it's ID (a required `int` property of the `IHasID` interface).
 
-This can useful when passing around objects that need to kept in sync, such as models
+This can useful when passing around objects that need to kept in sync, such as models:
 ```
-sing System;
+using System;
 using JoeForshaw.Messenger;
 
 class ModelSyncSample
