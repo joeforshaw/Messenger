@@ -33,7 +33,7 @@ Messenger.Subscribe (this, "string identifier", () => Console.WriteLine ("Messag
 But it's important to note messages with the same string indentifier but different argument type (including no type arguments) are different signatures, so won't be received by the same subscribers.
 
 ## Example
-Here's an example of an object subscribing to "foo.bar" messages:
+Here's an example of an object subscribing and unsubscribing from "foo.bar" messages:
 ```
 using System;
 using JoeForshaw.Messenger;
@@ -47,6 +47,10 @@ class SubscribeSample
         Messenger.Subscribe (subscriber, "foo.bar", subscriber.HandleFooBar);
         
         Messenger.Send ("foo.bar"); // Prints "Foo Bar"
+        
+        Messenger.Unsubscribe (subscriber, "foo.bar");
+        
+        Messenger.Send ("foo.bar"); // Nothing happens
     }
 }
 
