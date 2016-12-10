@@ -17,7 +17,34 @@ Messenger.Subscribe (this, "string identifier", () => Console.WriteLine ("Messag
 
 But it's important to note messages with the same string indentifier but different argument type (including no type arguments) are different signatures, so won't be received by the same subscribers.
 
-### IHasID Interface
+## Example
+Here's an example of an object subscribing to "foo.bar" messages:
+```
+using System;
+using JoeForshaw.Messenger;
+
+class SubscribeSample
+{
+    public static void Main (string [] args)
+    {
+        var subscriber = new Subscriber ();
+
+        Messenger.Subscribe (subscriber, "foo.bar", subscriber.HandleFooBar);
+        
+        Messenger.Send ("foo.bar"); // Prints "Foo Bar"
+    }
+}
+
+class Subscriber
+{
+    public void HandleFooBar ()
+    {
+        Console.WriteLine ("Foo Bar");
+    }
+}
+```
+
+## IHasID Interface
 Instead of subscribing to messages using string signatures, you can pass in an object which implements the `IHasID` interface. Under the hood, a signature will be generated from the type of the object and it's ID (a required `int` property of the `IHasID` interface).
 
 This can useful when passing around objects that need to kept in sync, such as models:
@@ -76,33 +103,6 @@ class Model : IHasID
 class ModelUpdatedArgs
 {
     public Model UpdatedModel { get; set; }
-}
-```
-
-## Example
-Here's an example of an object subscribing to "foo.bar" messages:
-```
-using System;
-using JoeForshaw.Messenger;
-
-class SubscribeSample
-{
-    public static void Main (string [] args)
-    {
-        var subscriber = new Subscriber ();
-
-        Messenger.Subscribe (subscriber, "foo.bar", subscriber.HandleFooBar);
-        
-        Messenger.Send ("foo.bar"); // Prints "Foo Bar"
-    }
-}
-
-class Subscriber
-{
-    public void HandleFooBar ()
-    {
-        Console.WriteLine ("Foo Bar");
-    }
 }
 ```
 
